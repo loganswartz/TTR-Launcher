@@ -3,14 +3,27 @@
 import os
 import time
 import json
+import platform
 
 import requests
 import sys
 
-GAME = "/Users/{}/Library/Application Support/Toontown Rewritten/Toontown Rewritten".format(os.getlogin())
-DYLD_LIBRARY_PATH = "/Users/{}/Library/Application Support/Toontown Rewritten/Libraries.bundle".format(os.getlogin())
-DYLD_FRAMEWORK_PATH = "/Users/{}/Library/Application Support/Toontown Rewritten/Frameworks".format(os.getlogin())
-CONFIG_DIRECTORY = os.path.expanduser("~/.config/ttrlauncher/")
+system = platform.system()
+snap = False
+
+if system == "Darwin":
+    GAME = f"/Users/{os.getlogin()}/Library/Application Support/Toontown Rewritten/Toontown Rewritten"
+    DYLD_LIBRARY_PATH = f"/Users/{os.getlogin()}/Library/Application Support/Toontown Rewritten/Libraries.bundle"
+    DYLD_FRAMEWORK_PATH = f"/Users/{os.getlogin()}/Library/Application Support/Toontown Rewritten/Frameworks"
+    CONFIG_DIRECTORY = os.path.expanduser("~/.config/ttrlauncher/")
+elif system == "Linux":
+    if snap == True:
+        GAME = f"/home/{os.getlogin()}/snap/toontown/common/toontown-rewritten/TTREngine"
+    else:
+        GAME = "/usr/share/toontown-rewritten/TTREngine"
+    DYLD_LIBRARY_PATH = ""
+    DYLD_FRAMEWORK_PATH = ""
+    CONFIG_DIRECTORY = os.path.expanduser("~/.config/ttrlauncher/")
 
 URL = "https://www.toontownrewritten.com/api/login?format=json"
 
@@ -19,9 +32,9 @@ if not os.path.exists(CONFIG_DIRECTORY):
 
 if not os.path.exists(CONFIG_DIRECTORY + 'config.json'):
     with open(CONFIG_DIRECTORY + 'config.json', 'w') as f:
-        f.write(json.dumps({}))
+        f.write(json.dumps([]))
     with open(CONFIG_DIRECTORY + 'config.json.example', 'w') as f:
-        f.write(json.dumps({"AccountNickName": ['username', 'password']}))
+        f.write(json.dumps([['username', 'password', 'nickname']]))
 
 ACCOUNTS = json.load(open(CONFIG_DIRECTORY + 'config.json', 'r'))
 
@@ -30,21 +43,34 @@ def die(reason):
     print(reason)
     exit(1)
 
+def get_nickname(account):
+    if len(account) < 3:
+        return account[0]
+    else:
+        return account[2]
 
 def select_account():
     if not len(ACCOUNTS):
-        die('Error: You need to open {} and add some accounts! See config.json.example for examples.'.format(
-            CONFIG_DIRECTORY + "config.json"))
+        die(f'Error: You need to open {CONFIG_DIRECTORY + "config.json"} and add some accounts! See config.json.example for examples.')
 
     if len(sys.argv) > 1 and sys.argv[1] in ACCOUNTS.keys():
         return ACCOUNTS[sys.argv[1]]
 
     while True:
-        print("Available accounts: {}".format(", ".join(ACCOUNTS.keys())))
-        account = input('Which account? ')
-        if account in ACCOUNTS.keys():
+        if len(ACCOUNTS) == 1:
+            print(f"Only 1 account found; Using {get_nickname(ACCOUNTS[0])}")
+            account = 0
+        else:
+            print("Available accounts:")
+            for index, acc in enumerate(ACCOUNTS):
+                print(f"    [ {index} ] {get_nickname(acc)}")
+
+            account = int(input('Which account? '))
+
+        if account <= len(ACCOUNTS):
             return ACCOUNTS[account]
-        print("Invalid account, try again.")
+        else:
+            print("Invalid account, try again.")
 
 
 def finish_partial_auth(r):
@@ -93,3 +119,4 @@ def login(account):
 
 
 login(select_account())
+
