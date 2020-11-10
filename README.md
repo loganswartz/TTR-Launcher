@@ -1,5 +1,14 @@
 # TTR Launcher
+A simple CLI launcher for Toontown Rewritten.
 
-This is a simple, quick launcher I wrote for Toontown Rewritten after getting annoyed at their own launcher.
-At some point, I'll add the ability to patch inside of here as well. I built this with OS X in mind, but with some
-trivial changes you can add support for Linux too.
+## About
+Originally written by [Omeryl](https://github.com/Omeryl), it's been
+extensively rewritten by me ([loganswartz](https://github.com/loganswartz))
+Supports macOS, Linux (snap package and regular version), and Windows, without
+all the weird crashes or behavior of the official launcher.
+
+## Usage
+Assuming the `ttr_launcher` folder is in your PYTHONPATH:
+```bash
+~ $ python3 -m ttr_launcher
+```

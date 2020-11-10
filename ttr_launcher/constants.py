@@ -4,8 +4,7 @@
 # builtins
 import logging
 from platform import system
-from pathlib import Path
-import sys
+import pathlib
 
 # }}}
 
@@ -13,54 +12,34 @@ import sys
 log = logging.getLogger(__name__)
 
 
+def path(path: str):
+    return pathlib.Path(path).expanduser().resolve()
+
+CONFIG_DIRECTORY = path("~/.config/ttrlauncher/")
+
+ENV = {}
 if system() == "Darwin":
-    GAME = (
-        Path("~/Library/Application Support/Toontown Rewritten/Toontown Rewritten")
-        .expanduser()
-        .resolve()
-    )
     GAME_DIR = (
-        Path("~/Library/Application Support/Toontown Rewritten/").expanduser().resolve()
+        path("~/Library/Application Support/Toontown Rewritten/")
     )
-    DYLD_LIBRARY_PATH = (
-        Path("~/Library/Application Support/Toontown Rewritten/Libraries.bundle")
-        .expanduser()
-        .resolve()
-    )
-    DYLD_FRAMEWORK_PATH = (
-        Path("~/Library/Application Support/Toontown Rewritten/Frameworks")
-        .expanduser()
-        .resolve()
-    )
-    CONFIG_DIRECTORY = Path("~/.config/ttrlauncher/").expanduser().resolve()
+    GAME = GAME_DIR / "Toontown Rewritten"
+    ENV['DYLD_LIBRARY_PATH'] = GAME_DIR / "Libraries.bundle"
+    ENV['DYLD_FRAMEWORK_PATH'] = GAME_DIR / "Frameworks"
 elif system() == "Linux":
     # if using the TTR snap package
-    ttr_snap_dir = Path("/snap/toontown/current/")
+    ttr_snap_dir = path("/snap/toontown/current/")
     if ttr_snap_dir.is_dir():
-        GAME = (
-            Path("~/snap/toontown/common/toontown-rewritten/TTREngine")
-            .expanduser()
-            .resolve()
-        )
         GAME_DIR = (
-            Path("~/snap/toontown/common/toontown-rewritten/").expanduser().resolve()
+            path("~/snap/toontown/common/toontown-rewritten/")
         )
     else:
-        GAME = Path("/usr/share/toontown-rewritten/TTREngine").resolve()
-        GAME_DIR = Path("/usr/share/toontown-rewritten/").resolve()
-    DYLD_LIBRARY_PATH = ""
-    DYLD_FRAMEWORK_PATH = ""
-    CONFIG_DIRECTORY = Path("~/.config/ttrlauncher/").expanduser().resolve()
+        GAME_DIR = path("/usr/share/toontown-rewritten/")
+    GAME = GAME_DIR / "TTREngine"
 elif system() == "Windows":
-    # if on a 64-bit system
-    if sys.maxsize > 2 ** 32:
-        system = "win64"
-    else:
-        system = "win32"
-    log.error("Windows is not yet supported.")
+    GAME_DIR = path('C:/Program Files (x86)/Toontown Rewritten')
+    GAME = GAME_DIR / "TTREngine.exe"
 else:
     log.error(f'Error: Platform "{system}" not supported.')
-
 
 LOGIN_URL = "https://www.toontownrewritten.com/api/login?format=json"
 PATCH_MANIFEST_URL = "https://cdn.toontownrewritten.com/content/patchmanifest.txt"
