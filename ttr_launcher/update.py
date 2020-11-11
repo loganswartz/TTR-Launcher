@@ -39,7 +39,8 @@ def get_updates(platform: str):
 
 
 def update_file(filename: str, file: dict):
-    archive = requests.get(CONTENT_REPO_URL + file["dl"]).content
+    resp = requests.get(CONTENT_REPO_URL + file["dl"])
+    archive = resp.content
     saved = GAME_DIR / filename
 
     with saved.open("wb+") as fp:

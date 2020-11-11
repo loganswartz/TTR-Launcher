@@ -43,4 +43,4 @@ else:
 
 LOGIN_URL = "https://www.toontownrewritten.com/api/login?format=json"
 PATCH_MANIFEST_URL = "https://cdn.toontownrewritten.com/content/patchmanifest.txt"
-CONTENT_REPO_URL = "https://cdn.toontownrewritten.com/content/"
+CONTENT_REPO_URL = "https://download.toontownrewritten.com/patches/"
